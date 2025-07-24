@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory | Sameera Super</title>
+  <link rel="stylesheet" href="inventory.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background: #2b6777;
+      color: white;
+      padding: 15px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links li a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .inventory-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2b6777;
+    }
+
+    .product-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .product-form input {
+      flex: 1 1 200px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .product-form button {
+      background-color: #2b6777;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e1ecf4;
+    }
+
+    .edit-btn, .delete-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      margin: 2px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+    }
+
+    .expired-section {
+      background-color: #fdecea;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .expired-section h3 {
+      color: #b22222;
+    }
+  </style>
+</head>
+<body>
+
+   <!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <img src="img.png" alt="Sameera Super Logo" class="logoimg">
+    Sameera Super
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="inventory.html">Inventory</a></li>
+    <li><a href="suppliers.html">Suppliers</a></li>
+    <li><a href="orders.html">Orders</a></li>
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="staff.html">Staff</a></li>
+
+    <li><a href="cart.html">Cart</a></li>
+    <li><a href="login.html">Profile</a></li>
+  </ul>
+</nav>
+
+  <!-- Inventory Section -->
+  <main class="inventory-container">
+    <h2>Inventory Management - Sameera Super</h2>
+
+    <!-- Add Product Form -->
+    <form id="addProductForm" class="product-form">
+      <input type="text" id="pname" placeholder="Product Name" required />
+      <input type="number" id="pqty" placeholder="Quantity" required />
+      <input type="text" id="pprice" placeholder="Price (LKR)" required />
+      <input type="date" id="pexpiry" required />
+      <button type="submit">Add Product</button>
+    </form>
+
+    <!-- Main Inventory Table -->
+    <h3>Available Inventory</h3>
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Expiry</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS will populate -->
+         <tr>
+          <td>101</td>
+          <td>Milk 1L</td>
+          <td>45</td>
+          <td>350.00</td>
+          <td>2025-03-10</td>
+          <td>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Expired Products Table -->
+    <div class="expired-section">
+      <h3>Expired Products</h3>
+      <table id="expiredTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Expiry</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- JS will populate -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  
+  <!-- JS Script -->
+  <script>
+    const mainTable = document.getElementById('mainTable').getElementsByTagName('tbody')[0];
+    const expiredTable = document.getElementById('expiredTable').getElementsByTagName('tbody')[0];
+    const form = document.getElementById('addProductForm');
+    let productId = 104;
+
+    // Sample Data
+    const initialProducts = [
+      { id: 101, name: "Milk 1L", qty: 30, price: 350, expiry: "2025-03-10" },
+      { id: 102, name: "Bread", qty: 20, price: 200, expiry: "2024-07-01" },
+      
+    ];
+
+    function addProductRow(p) {
+      const today = new Date();
+      const exp = new Date(p.expiry);
+      const diff = (exp - today) / (1000 * 60 * 60 * 24);
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>${p.price}</td>
+        <td>${p.expiry}</td>
+        ${diff >= 0 ? `<td><button class="edit-btn">Edit</button><button class="delete-btn" onclick="deleteRow(this)">Delete</button></td>` : ""}
+      `;
+
+      if (diff < 0) {
+        row.style.backgroundColor = "#f8d7da"; // expired
+        expiredTable.appendChild(row);
+      } else {
+        if (diff <= 7) {
+          row.style.backgroundColor = "#fff3cd"; // near-expiry
+        }
+        mainTable.appendChild(row);
+      }
+    }
+
+    initialProducts.forEach(p => addProductRow(p));
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const newProduct = {
+        id: productId++,
+        name: document.getElementById('pname').value,
+        qty: document.getElementById('pqty').value,
+        price: document.getElementById('pprice').value,
+        expiry: document.getElementById('pexpiry').value
+      };
+      addProductRow(newProduct);
+      form.reset();
+    });
+
+    function deleteRow(btn) {
+      btn.closest('tr').remove();
+    }
+  </script>
+
+  
+</body>
+</html>

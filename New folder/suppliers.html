@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suppliers | Sameera Super</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    
+    
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e1ecf4;
+    }
+
+    section {
+      margin-top: 50px;
+    }
+
+    .section-title {
+      color: #2b6777;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .action-btn {
+     
+      background-color: #ff9900;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+   
+    .rating {
+      color: #ff9900;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <img src="img.png" alt="Sameera Super Logo" class="logoimg">
+    Sameera Super
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="inventory.html">Inventory</a></li>
+    <li><a href="suppliers.html">Suppliers</a></li>
+    <li><a href="orders.html">Orders</a></li>
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="cart.html">Cart</a></li>
+    <li><a href="login.html">Profile</a></li>
+  </ul>
+</nav>
+
+<!-- Main Section -->
+<main class="container">
+  <h2>Supplier Management - Sameera Super</h2>
+
+  <!-- Add Supplier -->
+  <form class="form">
+    <input type="text" placeholder="Supplier Name" required />
+    <input type="text" placeholder="Contact Number" required />
+    <input type="text" placeholder="Address" required />
+    <input type="text" placeholder="Products Supplied" required />
+    <button type="submit">Add Supplier</button>
+  </form>
+
+  <!-- Supplier List -->
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Contact</th>
+        <th>Address</th>
+        <th>Products</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Lanka Traders</td>
+        <td>0777123456</td>
+        <td>No.5, Colombo</td>
+        <td>Rice, Sugar</td>
+        <td><button class="action-btn">Edit</button> <button class="action-btn">Delete</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- View Purchase History -->
+  <section>
+    <h3 class="section-title">🧾 Purchase History</h3>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Supplier</th><th>Items</th><th>Total Cost</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2025-06-01</td>
+          <td>Lanka Traders</td>
+          <td>Rice (50kg), Sugar (30kg)</td>
+          <td>LKR 75,000</td>
+          <td> <button class="action-btn">Delete</button></td>
+        </tr>
+        <tr>
+          <td>2025-06-15</td>
+          <td>Lanka Traders</td>
+          <td>Flour (20kg)</td>
+          <td>LKR 20,000</td>
+          <td> <button class="action-btn">Delete</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+ 
+
+  <!-- Monitor Performance -->
+  <section>
+    <h3 class="section-title">📊 Supplier Performance</h3>
+    <table>
+      <thead>
+        <tr><th>Supplier</th><th>On-time Deliveries</th><th>Issue Reports</th><th>Rating</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lanka Traders</td>
+          <td>9 / 10</td>
+          <td>1</td>
+          <td class="rating">★★★★☆</td>
+        </tr>
+        <tr>
+          <td>Sun Agro</td>
+          <td>6 / 10</td>
+          <td>3</td>
+          <td class="rating">★★★☆☆</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+   <!-- Create Purchase Orders -->
+  <section>
+    <h3 class="section-title">📦 Create Purchase Order</h3>
+    <form class="form">
+      <input type="text" placeholder="Supplier Name" required />
+      <input type="text" placeholder="Product" required />
+      <input type="number" placeholder="Quantity (kg)" required />
+      <input type="date" required />
+      <button type="submit">Submit Order</button>
+    </form>
+  </section>
+</main>
+
+</body>
+</html>

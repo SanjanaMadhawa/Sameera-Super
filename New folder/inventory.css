@@ -1,0 +1,110 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: #f4f7f9;
+}
+
+.navbar {
+  background-color: #2b6777;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 10%;
+  align-items: center;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+}
+
+.logoimg{
+  height: 40px; vertical-align: middle; margin-right: 10px;
+  margin-left: s0px;
+  border-radius: 10px;
+}
+
+.inventory-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.inventory-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2b6777;
+}
+
+.product-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: space-between;
+}
+
+.product-form input,
+.product-form button {
+  flex: 1 1 180px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.product-form button {
+  background-color: #2b6777;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.product-form button:hover {
+  background-color: #1f4b59;
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-table th,
+.inventory-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.inventory-table th {
+  background-color: #e0ebeb;
+  color: #2b6777;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 5px 10px;
+  margin: 0 3px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}

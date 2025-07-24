@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Management | Sameera Super</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 60%;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: red;
+    }
+
+    .purchase-list {
+      margin-top: 15px;
+    }
+
+    .purchase-list ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .purchase-list ul li {
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .loyalty-badge {
+      background: #0a9396;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <img src="img.png" alt="Sameera Super Logo" class="logoimg">
+    Sameera Super
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="inventory.html">Inventory</a></li>
+    <li><a href="suppliers.html">Suppliers</a></li>
+    <li><a href="orders.html">Orders</a></li>
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="cart.html">Cart</a></li>
+    <li><a href="login.html">Profile</a></li>
+  </ul>
+</nav>
+
+<!-- Customer Management Section -->
+<div class="container">
+  <h2>Customer Management</h2>
+
+  <!-- Customer Form -->
+  <form class="form" id="customerForm">
+    <input type="text" id="custName" placeholder="Full Name" required />
+    <input type="email" id="custEmail" placeholder="Email" required />
+    <input type="tel" id="custPhone" placeholder="Phone (e.g., 0771234567)" pattern="[0-9]{10}" required />
+    <input type="text" id="custAddress" placeholder="Address" required />
+    <button type="submit" id="submitBtn">Add Customer</button>
+  </form>
+
+  <!-- Customer Table -->
+  <table class="inventory-table" id="customerTable">
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th>Loyalty</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Preloaded Sample Customer -->
+      <tr>
+        <td>Nimal Perera</td>
+        <td>nimal@gmail.com</td>
+        <td>0771234567</td>
+        <td>No. 123, Colombo</td>
+        <td><span class="loyalty-badge">150 Points</span></td>
+        <td>
+          <button onclick="editCustomer(this)">Edit</button>
+          <button onclick="deleteCustomer(this)">Delete</button>
+          <button onclick="viewHistory('Nimal Perera')">View History</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div id="purchaseModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3>Purchase History</h3>
+    <div class="purchase-list" id="purchaseContent">
+      <ul>
+        <li>Milk 1L - 2 Qty - 2025-06-28</li>
+        <li>Rice 5kg - 1 Qty - 2025-06-20</li>
+        <li>Bread - 3 Qty - 2025-06-15</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('customerForm');
+  const tableBody = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+  const submitBtn = document.getElementById('submitBtn');
+  let editingRow = null;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('custName').value.trim();
+    const email = document.getElementById('custEmail').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+
+    if (editingRow) {
+      editingRow.cells[0].innerText = name;
+      editingRow.cells[1].innerText = email;
+      editingRow.cells[2].innerText = phone;
+      editingRow.cells[3].innerText = address;
+      editingRow = null;
+      submitBtn.innerText = "Add Customer";
+    } else {
+      const newRow = tableBody.insertRow();
+      newRow.innerHTML = `
+        <td>${name}</td>
+        <td>${email}</td>
+        <td>${phone}</td>
+        <td>${address}</td>
+        <td><span class="loyalty-badge">100 Points</span></td>
+        <td>
+          <button onclick="editCustomer(this)">Edit</button>
+          <button onclick="deleteCustomer(this)">Delete</button>
+          <button onclick="viewHistory('${name}')">View History</button>
+        </td>
+      `;
+    }
+
+    form.reset();
+  });
+
+  function deleteCustomer(button) {
+    const row = button.closest('tr');
+    if (confirm("Are you sure you want to delete this customer?")) {
+      row.remove();
+    }
+  }
+
+  function editCustomer(button) {
+    const row = button.closest('tr');
+    document.getElementById('custName').value = row.cells[0].innerText;
+    document.getElementById('custEmail').value = row.cells[1].innerText;
+    document.getElementById('custPhone').value = row.cells[2].innerText;
+    document.getElementById('custAddress').value = row.cells[3].innerText;
+    editingRow = row;
+    submitBtn.innerText = "Update Customer";
+  }
+
+  function viewHistory(name) {
+    document.getElementById("purchaseModal").style.display = "block";
+    document.querySelector("#purchaseModal h3").innerText = name + "'s Purchase History";
+  }
+
+  function closeModal() {
+    document.getElementById("purchaseModal").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("purchaseModal");
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+
+</body>
+</html>
