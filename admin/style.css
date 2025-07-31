@@ -1,0 +1,293 @@
+/* =================== RESET =================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* =================== BODY =================== */
+body {
+  background-color: #f4f7f9;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* =================== NAVBAR =================== */
+.navbar {
+  background-color: #2b6777;
+  color: white;
+  padding: 15px 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 26px;
+  font-weight: bold;
+  color: white;
+  
+}
+
+.logoimg{
+  height: 40px; vertical-align: middle; margin-right: 10px;
+  margin-left: s0px;
+  border-radius: 10px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links li a:hover {
+  color: #ffdd00;
+}
+
+/* =================== HERO =================== */
+.hero {
+  padding: 80px 10%;
+  text-align: center;
+  background: #c8d8e4;
+}
+
+.hero h1 {
+  font-size: 40px;
+  color: #2b6777;
+}
+
+.hero p {
+  font-size: 18px;
+}
+
+.cta-button {
+  background-color: #005f73;
+  color: white;
+  padding: 12px 24px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.cta-button:hover {
+  background-color: #0a9396;
+}
+
+/* =================== FEATURES =================== */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  padding: 40px 10%;
+  gap: 20px;
+}
+
+.feature-box {
+  background: white;
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* =================== FOOTER =================== */
+footer {
+  background: #2b6777;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+/* =================== MAIN CONTENT =================== */
+.main-content {
+  text-align: center;
+  padding: 100px 20px;
+  background: linear-gradient(to right, #d0f4de, #fefae0);
+}
+
+.main-content h1 {
+  font-size: 42px;
+  color: #005f73;
+  margin-bottom: 20px;
+}
+
+.main-content p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+/* =================== CONTAINER =================== */
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* =================== FORM =================== */
+.form, form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-direction: column;
+}
+
+.form input,
+.form select,
+.form button,
+form input,
+form textarea,
+form select,
+form button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.form button,
+form button {
+  background-color: #0a9396;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form button:hover,
+form button:hover {
+  background-color: #007f87;
+}
+
+/* =================== TABLES =================== */
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.inventory-table th,
+.inventory-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  text-align: center;
+}
+
+.inventory-table th {
+  background-color: #f0f0f0;
+  color: #005f73;
+}
+
+.inventory-table tr:hover {
+  background-color: #f8f8f8;
+}
+
+.inventory-table button {
+  background-color: #ee9b00;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 2px;
+}
+
+.inventory-table button:hover {
+  background-color: #ca6702;
+}
+
+/* =================== LOGIN CONTAINER =================== */
+.login-container,
+.register-container {
+  max-width: 400px;
+  margin: 50px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-container h2,
+.register-container h2 {
+  color: #005f73;
+  margin-bottom: 20px;
+}
+
+/* =================== LOGIN/REGISTER FORMS =================== */
+.form-toggle {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-toggle button {
+  background: #005f73;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 0 5px;
+  border-radius: 5px;
+}
+
+.form-toggle button.active {
+  background: #0a9396;
+}
+
+.form-wrapper {
+  display: none;
+}
+
+.form-wrapper.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #444;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+
+
+/* =================== spplier =================== */
