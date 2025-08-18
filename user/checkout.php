@@ -7,75 +7,115 @@ if (!isset($_SESSION['userEmail'])) {
     exit();
 }
 
-$userEmail = $_SESSION['userEmail'];
-
-// Fetch user ID & name
-$stmt = $conn->prepare("SELECT user_id, name FROM users WHERE email = ?");
-$stmt->bind_param("s", $userEmail);
+// Get user_id from session email
+$stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
+$stmt->bind_param("s", $_SESSION['userEmail']);
 $stmt->execute();
 $res = $stmt->get_result();
 $user = $res->fetch_assoc();
-$userId = $user['user_id'];
-$userName = $user['name'];
+$userId = (int)$user['user_id'];
 $stmt->close();
 
-// Fetch cart items
-$cart = $conn->query("
-  SELECT c.product_id, i.name AS product_name, i.price, c.quantity
-  FROM cart c
-  JOIN inventory i ON c.product_id = i.inventory_id
-  WHERE c.user_id = $userId
-");
+// Ensure active cart exists
+if (empty($_SESSION['active_cart_id'])) {
+    header("Location: cart.php");
+    exit();
+}
+$cartId = (int)$_SESSION['active_cart_id'];
 
-if ($cart->num_rows == 0) {
-    echo "Cart is empty!";
+// Ensure cart has items
+$check = $conn->prepare("SELECT COUNT(*) FROM cart_items WHERE cart_id = ?");
+$check->bind_param("i", $cartId);
+$check->execute();
+$check->bind_result($cnt);
+$check->fetch();
+$check->close();
+
+if ($cnt == 0) {
+    header("Location: cart.php");
     exit();
 }
 
-// Insert into orders table
-$orderDate = date("Y-m-d");
-$conn->query("INSERT INTO orders (user_id, order_date, total_amount) VALUES ($userId, '$orderDate', 0)");
-$orderId = $conn->insert_id;
+$conn->begin_transaction();
 
-$totalAmount = 0;
-$items = [];
+try {
+    // Calculate cart total
+    $stmt = $conn->prepare("
+        SELECT SUM(i.price * ci.quantity) AS total
+        FROM cart_items ci
+        JOIN inventory i ON ci.product_id = i.inventory_id
+        WHERE ci.cart_id = ?
+    ");
+    $stmt->bind_param("i", $cartId);
+    $stmt->execute();
+    $totalRes = $stmt->get_result();
+    $total = (float)($totalRes->fetch_assoc()['total'] ?? 0);
+    $stmt->close();
 
-while ($item = $cart->fetch_assoc()) {
-    $pid = $item['product_id'];
-    $pname = $item['product_name'];
-    $price = $item['price'];
-    $qty = $item['quantity'];
-    $subtotal = $price * $qty;
+    if ($total <= 0) {
+        throw new Exception("Cart total invalid.");
+    }
 
-    $conn->query("INSERT INTO order_items (order_id, product_id, quantity, price)
-                  VALUES ($orderId, $pid, $qty, $price)");
+    // Create order
+    $stmt = $conn->prepare("
+        INSERT INTO orders (user_id, order_date, total_amount, status) 
+        VALUES (?, NOW(), ?, 'Pending')
+    ");
+    $stmt->bind_param("id", $userId, $total);
+    $stmt->execute();
+    $orderId = $stmt->insert_id;
+    $stmt->close();
 
-    $items[] = [
-        'product_id' => $pid,
-        'product_name' => $pname,
-        'quantity' => $qty,
-        'subtotal' => $subtotal
-    ];
+    // Insert order items from cart
+    $stmt = $conn->prepare("
+        INSERT INTO order_items (order_id, product_id, quantity, price)
+        SELECT ?, ci.product_id, ci.quantity, i.price
+        FROM cart_items ci
+        JOIN inventory i ON ci.product_id = i.inventory_id
+        WHERE ci.cart_id = ?
+    ");
+    $stmt->bind_param("ii", $orderId, $cartId);
+    $stmt->execute();
+    $stmt->close();
 
-    $totalAmount += $subtotal;
+    // Reduce inventory stock safely
+    $stmt = $conn->prepare("
+        UPDATE inventory i
+        JOIN cart_items ci ON ci.product_id = i.inventory_id
+        SET i.stock = i.stock - ci.quantity
+        WHERE ci.cart_id = ? AND i.stock >= ci.quantity
+    ");
+    $stmt->bind_param("i", $cartId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Mark cart as checked out
+    $stmt = $conn->prepare("UPDATE carts SET status = 'checked_out' WHERE cart_id = ?");
+    $stmt->bind_param("i", $cartId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Clear items (optional since they are copied to orders)
+    $stmt = $conn->prepare("DELETE FROM cart_items WHERE cart_id = ?");
+    $stmt->bind_param("i", $cartId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Reset session cart
+unset($_SESSION['active_cart_id']);
+
+$conn->commit();
+
+// Redirect back to cart.php with success message
+header("Location: cart.php?success=order_placed");
+exit();
+
+} catch (Throwable $e) {
+    $conn->rollback();
+    // Debugging
+    // echo "Checkout failed: " . $e->getMessage();
+    header("Location: cart.php?error=checkout_failed");
+    exit();
 }
 
-// Update total in orders table
-$conn->query("UPDATE orders SET total_amount = $totalAmount WHERE order_id = $orderId");
-
-// Clear the cart
-$conn->query("DELETE FROM cart WHERE user_id = $userId");
-
-// Pass order details via session
-$_SESSION['orderDetails'] = [
-    'order_id' => $orderId,
-    'user_name' => $userName,
-    'items' => $items,
-    'total_amount' => $totalAmount
-];
-
-// Redirect to orders page
-header("Location: cart.php");
-exit();
-?>
 
