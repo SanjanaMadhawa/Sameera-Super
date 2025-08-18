@@ -18,33 +18,85 @@ $user = $res->fetch_assoc();
 $userId = $user['user_id'];
 $stmt->close();
 
-// Add to cart
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
-    $pid = intval($_POST['product_id']);
-    $qty = intval($_POST['quantity']);
-    $conn->query("INSERT INTO cart(user_id, product_id, quantity) VALUES($userId, $pid, $qty)");
-}
+/*Ensure there is a single OPEN cart for this user and keep its ID in session.*/
+function getOrCreateOpenCartId(mysqli $conn, int $userId): int {
+    // 1) Try to reuse open cart
+    $stmt = $conn->prepare("SELECT cart_id FROM carts WHERE user_id = ? AND status = 'open' ORDER BY cart_id DESC LIMIT 1");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $stmt->bind_result($existingCartId);
+    if ($stmt->fetch()) {
+        $stmt->close();
+        return (int)$existingCartId;
+    }
+    $stmt->close();
 
-// Remove from cart
-if (isset($_POST['remove_cart_id'])) {
-    $remove_id = intval($_POST['remove_cart_id']);
-    $conn->query("DELETE FROM cart WHERE cart_id = $remove_id AND user_id = $userId");
+    // 2) Create a new open cart
+    $stmt = $conn->prepare("INSERT INTO carts (user_id) VALUES (?)");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $newId = $stmt->insert_id;
+    $stmt->close();
+    return (int)$newId;
+}
+// Keep active cart id in session (optional but convenient)
+if (!isset($_SESSION['active_cart_id'])) {
+    $_SESSION['active_cart_id'] = getOrCreateOpenCartId($conn, $userId);
+}
+$cartId = (int)$_SESSION['active_cart_id'];
+
+// Add to cart (from product.php)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id']) && !isset($_POST['update_item_id']) && !isset($_POST['remove_item_id'])) {
+    $pid = max(1, (int)$_POST['product_id']);
+    $qty = max(1, (int)($_POST['quantity'] ?? 1));
+
+    // Upsert: if the product already exists in this cart, increase quantity
+    $stmt = $conn->prepare("
+        INSERT INTO cart_items (cart_id, product_id, quantity)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+    ");
+    $stmt->bind_param("iii", $cartId, $pid, $qty);
+    $stmt->execute();
+    $stmt->close();
+
+    header("Location: cart.php");
+    exit();
 }
 
 // Update quantity
-if (isset($_POST['update_cart_id']) && isset($_POST['new_quantity'])) {
-    $update_id = intval($_POST['update_cart_id']);
-    $new_qty = intval($_POST['new_quantity']);
-    $conn->query("UPDATE cart SET quantity = $new_qty WHERE cart_id = $update_id AND user_id = $userId");
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item_id'])) {
+    $itemId = (int)$_POST['update_item_id'];
+    $newQty = max(1, (int)$_POST['new_quantity']);
+    $stmt = $conn->prepare("UPDATE cart_items SET quantity = ? WHERE item_id = ? AND cart_id = ?");
+    $stmt->bind_param("iii", $newQty, $itemId, $cartId);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: cart.php");
+    exit();
+}
+
+// Remove item
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item_id'])) {
+    $itemId = (int)$_POST['remove_item_id'];
+    $stmt = $conn->prepare("DELETE FROM cart_items WHERE item_id = ? AND cart_id = ?");
+    $stmt->bind_param("ii", $itemId, $cartId);
+    $stmt->execute();
+    $stmt->close();
+    header("Location: cart.php");
+    exit();
 }
 
 // Fetch cart data
-$res = $conn->query("
-  SELECT c.cart_id, i.name, i.price, c.quantity
-  FROM cart c
-  JOIN inventory i ON c.product_id = i.inventory_id
-  WHERE c.user_id = $userId
+$stmt = $conn->prepare("
+  SELECT ci.item_id, i.inventory_id, i.name, i.price, ci.quantity
+  FROM cart_items ci
+  JOIN inventory i ON ci.product_id = i.inventory_id
+  WHERE ci.cart_id = ?
 ");
+$stmt->bind_param("i", $cartId);
+$stmt->execute();
+$items = $stmt->get_result();
 
 $total = 0;
 ?>
@@ -53,7 +105,7 @@ $total = 0;
 <head>
   <meta charset="UTF-8">
   <title>Cart | Sameera Super</title>
-  <link rel="stylesheet" href="style1.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -79,34 +131,34 @@ $total = 0;
         <th>Product</th>
         <th>Qty</th>
         <th>Price</th>
-        <th>Total</th>
+        <th>Subtotal</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <?php while ($c = $res->fetch_assoc()):
+    <?php while ($c = $items->fetch_assoc()): 
         $sub = $c['price'] * $c['quantity'];
         $total += $sub;
-      ?>
-        <tr>
-          <td><h3><?= htmlspecialchars($c['name']) ?></h3></td>
-          <td>
-            <form method="POST" style="display:inline;">
-              <input type="hidden" name="update_cart_id" value="<?= $c['cart_id'] ?>">
-              <input type="number" name="new_quantity" value="<?= $c['quantity'] ?>" min="1">
-              <button class="cart-button update" type="submit">Update</button>
-            </form>
-          </td>
-          <td>Rs. <?= number_format($c['price'], 2) ?></td>
-          <td>Rs. <?= number_format($sub, 2) ?></td>
-          <td>
-            <form method="POST" style="display:inline;">
-              <input type="hidden" name="remove_cart_id" value="<?= $c['cart_id'] ?>">
-              <button class="cart-button remove" type="submit">Remove</button>
-            </form>
-          </td>
-        </tr>
-      <?php endwhile; ?>
+    ?>
+      <tr>
+        <td><h3><?= htmlspecialchars($c['name']) ?></h3></td>
+        <td>
+          <form method="POST" style="display:inline;">
+            <input type="hidden" name="update_item_id" value="<?= (int)$c['item_id'] ?>">
+            <input type="number" name="new_quantity" value="<?= (int)$c['quantity'] ?>" min="1">
+            <button class="cart-button update" type="submit">Update</button>
+          </form>
+        </td>
+        <td>Rs. <?= number_format($c['price'], 2) ?></td>
+        <td>Rs. <?= number_format($sub, 2) ?></td>
+        <td>
+          <form method="POST" style="display:inline;">
+            <input type="hidden" name="remove_item_id" value="<?= (int)$c['item_id'] ?>">
+            <button class="cart-button remove" type="submit">Remove</button>
+          </form>
+        </td>
+      </tr>
+    <?php endwhile; ?>
     </tbody>
   </table>
   <br>
@@ -114,9 +166,10 @@ $total = 0;
   <br>
   <?php if ($total > 0): ?>
     <form method="POST" action="checkout.php">
-      <button class="cart-button">Proceed to Checkout</button>
+        <button type="submit" class="cart-button">Proceed to Checkout</button>
     </form>
-  <?php endif; ?>
+<?php endif; ?>
+
 </div>
 </body>
 </html>
