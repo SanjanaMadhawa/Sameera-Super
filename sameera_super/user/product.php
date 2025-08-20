@@ -3,21 +3,6 @@ session_start();
 $conn = new mysqli("localhost", "root", "", "sameera_super");
 $user_id = 1; // Simulated logged-in user
 
-// Handle delete request safely
-if (isset($_GET['delete_product'])) {
-    $product_id = intval($_GET['delete_product']);
-
-    // First delete related cart entries to prevent foreign key error
-    $conn->query("DELETE FROM cart WHERE product_id = $product_id");
-
-    // Then delete the product
-    $conn->query("DELETE FROM inventory WHERE inventory_id = $product_id");
-
-    // Redirect to avoid resubmission
-    header("Location: product.php");
-    exit();
-}
-
 // Fetch all products with stock > 0
 $res = $conn->query("SELECT * FROM inventory WHERE stock > 0");
 ?>
@@ -27,9 +12,11 @@ $res = $conn->query("SELECT * FROM inventory WHERE stock > 0");
 <head>
   <meta charset="UTF-8">
   <title>Products | Sameera Super</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style2.css">
+
 </head>
 <body>
+
 <nav class="navbar">
   <div class="logo">
     <img src="img.png" alt="Sameera Super Logo" class="logoimg">
@@ -44,53 +31,55 @@ $res = $conn->query("SELECT * FROM inventory WHERE stock > 0");
   </ul>
 </nav>
 
+<!--Product Section--> 
 <div class="container">
   <h2>Product List</h2>
   <input type="text" id="search" placeholder="Search..." onkeyup="filterProducts()">
 
-  <table class="inventory-table" id="productTable">
-    <thead>
-      <tr>
-        <th>Product Name</th>
-        <th>Price (LKR)</th>
-        <th>Expiry Date</th>
-        <th>Quantity</th>
-        <th colspan="2">Actions</th>
-      </tr>
-    </thead>
-    <tbody id="list">
-      <?php while($p = $res->fetch_assoc()): ?>
-        <tr class="product-card">
-          <td><h3><?= htmlspecialchars($p['name']) ?></h3></td>
-          <td>Rs.<?= htmlspecialchars($p['price']) ?></td>
-          <td><?= htmlspecialchars($p['expiry_date']) ?></td>
-          <td>
+<section class="products" id="products">
+  <div class="heading">
+    
+  </div>
+
+  <div class="pr_contain">
+    <?php while($p = $res->fetch_assoc()): ?>
+      <div class="box">
+        <?php if (!empty($p['image']) && file_exists("uploads/" . $p['image'])): ?>
+          <img src="uploads/<?= htmlspecialchars($p['image']) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
+        <?php else: ?>
+          <img src="Img/default.png" alt="No image">
+        <?php endif; ?>
+
+        <h3><?= htmlspecialchars($p['name']) ?></h3>
+        <div class="content">
+          <span>Rs.<?= number_format($p['price'], 2) ?></span>
+          <?php if ($p['stock'] > 0): ?>
             <form method="POST" action="cart.php">
               <input type="hidden" name="product_id" value="<?= $p['inventory_id'] ?>">
-              <input type="number" name="quantity" value="1" min="1" max="<?= $p['stock'] ?>">
-          </td>
-          <td>
-              <button type="submit" class="action-btn">Add to Cart</button>
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit">Add to Cart</button>
             </form>
-            <a href="product.php?delete_product=<?= $p['inventory_id'] ?>" onclick="return confirm('Are you sure you want to delete this product?')">
-              <button class="action-btn delete-btn">Delete</button>
-            </a>
-          </td>
-         
-        </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table>
+          <?php else: ?>
+            <div class="out-of-stock">Out of stock</div>
+          <?php endif; ?>
+        </div>
+      </div>
+    <?php endwhile; ?>
+  </div>
+</section>
 </div>
 
+ <!-- Active navbar link -->
 <script>
-function filterProducts(){
-  const q = document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('#productTable tbody .product-card').forEach(row => {
-    const name = row.querySelector('h3').innerText.toLowerCase();
-    row.style.display = name.includes(q) ? '' : 'none';
+  const currentPage = window.location.pathname.split("/").pop();
+  const navLinks = document.querySelectorAll(".nav-links a");
+
+  navLinks.forEach(link => {
+    const linkPage = link.getAttribute("href");
+    if (linkPage === currentPage) {
+      link.classList.add("active");
+    }
   });
-}
 </script>
 </body>
 </html>
