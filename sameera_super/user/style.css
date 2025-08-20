@@ -45,6 +45,11 @@ body {
 .nav-links li a:hover {
   color: #ffdd00;
 }
+.nav-links a.active {
+  border-bottom: 2px solid #ca6702;
+  padding-bottom: 5px;
+  color: #ee9b00;
+}
 
 .logo {
   display: flex;
@@ -61,62 +66,6 @@ body {
   border-radius: 10px;
 }
 
-/* =================== HERO =================== */
-.hero {
-  padding: 80px 10%;
-  text-align: center;
-  background: #c8d8e4;
-}
-
-.hero h1 {
-  font-size: 40px;
-  color: #2b6777;
-}
-
-.hero p {
-  font-size: 18px;
-}
-
-.cta-button {
-  background-color: #005f73;
-  color: white;
-  padding: 12px 24px;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
-  transition: 0.3s;
-  display: inline-block;
-  margin-top: 20px;
-}
-
-.cta-button:hover {
-  background-color: #0a9396;
-}
-
-/* =================== FEATURES =================== */
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  padding: 40px 10%;
-  gap: 20px;
-}
-
-.feature-box {
-  background: white;
-  padding: 20px;
-  text-align: center;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-/* =================== FOOTER =================== */
-footer {
-  background: #2b6777;
-  color: white;
-  text-align: center;
-  padding: 20px;
-  margin-top: 40px;
-}
 
 /* =================== MAIN CONTENT =================== */
 .main-content {
@@ -145,6 +94,37 @@ footer {
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
+
+/* log out */
+/* Profile Actions Button */
+.profile-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.profile-actions a {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #dc3545; /* Red background */
+    color: #fff; /* White text */
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.profile-actions a:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.profile-actions a:active {
+    transform: translateY(0); /* Remove lift on click */
+    box-shadow: none;
+}
+
 
 /* =================== FORM =================== */
 .form, form {
@@ -343,4 +323,186 @@ textarea {
       background-color: #f1f1f1;
     }
 
-    
+     /* Add this if your CSS doesn't already style the section */
+    .products {
+      padding: 50px;
+      
+    }
+
+    .products .heading {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 30px;
+    }
+
+    .pr_contain {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+    }
+
+    .box img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .box h3 {
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+
+    .box .content {
+      
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .box .content span {
+      font-weight: bold;
+      color: #ca6702;
+    }
+
+    .box .content form button {
+      background-color: #2b6777;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .box .content form button:hover {
+      background-color: #ca6702;
+    }
+
+    .box .out-of-stock {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    /* Profile Actions Button */
+h2 {
+  margin-bottom: 15px;
+  color: #333;
+  border-left: 5px solid #2b6777;
+  padding-left: 10px;
+}
+.profile-actions {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.profile-actions a {
+    display: inline-block;
+    width: 150px;
+    padding: 12px 30px;
+    background-color: #e42639ff;
+    color: #fff; 
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.profile-actions a:hover {
+    background-color: #a00615ff; 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.profile-actions a:active {
+    transform: translateY(0); 
+    box-shadow: none;
+}
+
+
+/* =================== RESPONSIVE DESIGN =================== */
+@media (max-width: 992px) {
+  .navbar {
+    padding: 15px 5%;
+  }
+  .nav-links {
+    gap: 10px;
+  }
+  .main-content h1 {
+    font-size: 32px;
+  }
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .main-content {
+    padding: 60px 15px;
+  }
+  .main-content h1 {
+    font-size: 28px;
+  }
+  .main-content p {
+    font-size: 16px;
+  }
+  .products {
+    padding: 20px;
+  }
+  .pr_contain {
+    flex-direction: column;
+    align-items: center;
+  }
+  .box {
+    width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 20px;
+  }
+  .main-content h1 {
+    font-size: 24px;
+  }
+  .main-content p {
+    font-size: 14px;
+  }
+  .container {
+    margin: 10px;
+    padding: 15px;
+  }
+  .search-bar input {
+    width: 100%;
+  }
+  .action-btn, 
+  .profile-actions a {
+    width: 100%;
+  }
+}
