@@ -58,8 +58,8 @@ try {
 
     // Create order
     $stmt = $conn->prepare("
-        INSERT INTO orders (user_id, order_date, total_amount, status) 
-        VALUES (?, NOW(), ?, 'Pending')
+        INSERT INTO orders (user_id, order_date, total_amount) 
+        VALUES (?, NOW(), ?)
     ");
     $stmt->bind_param("id", $userId, $total);
     $stmt->execute();
@@ -95,27 +95,27 @@ try {
     $stmt->execute();
     $stmt->close();
 
-    // Clear items (optional since they are copied to orders)
+    // Clear cart items
     $stmt = $conn->prepare("DELETE FROM cart_items WHERE cart_id = ?");
     $stmt->bind_param("i", $cartId);
     $stmt->execute();
     $stmt->close();
 
     // Reset session cart
-unset($_SESSION['active_cart_id']);
+    unset($_SESSION['active_cart_id']);
 
-$conn->commit();
+    $conn->commit();
 
-// Redirect back to cart.php with success message
-header("Location: cart.php?success=order_placed");
-exit();
+    // Redirect with success
+    header("Location: cart.php?success=order_placed");
+    exit();
 
 } catch (Throwable $e) {
     $conn->rollback();
-    // Debugging
-    // echo "Checkout failed: " . $e->getMessage();
     header("Location: cart.php?error=checkout_failed");
     exit();
 }
+?>
+
 
 
