@@ -9,7 +9,7 @@ require_once 'connection.php';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | Sameera Super</title>
-  <link rel="stylesheet" href="style1.css">
+  <link rel="stylesheet" href="style_u.css">
   
 </head>
 <body>
@@ -21,7 +21,7 @@ require_once 'connection.php';
     Sameera Super
   </div>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
+    <li><a href="home_u.php">Home</a></li>
     <li><a href="product.php">Products</a></li>
     <li><a href="cart.php">Cart</a></li>
     <li><a href="profile.php">Profile</a></li>
