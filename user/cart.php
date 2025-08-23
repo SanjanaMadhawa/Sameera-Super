@@ -7,15 +7,14 @@ if (!isset($_SESSION['userEmail'])) {
     exit();
 }
 
+// Get logged-in user_id
 $userEmail = $_SESSION['userEmail'];
-
-// Get user_id for logged-in user
 $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
 $stmt->bind_param("s", $userEmail);
 $stmt->execute();
 $res = $stmt->get_result();
 $user = $res->fetch_assoc();
-$userId = $user['user_id'];
+$userId = (int)$user['user_id'];
 $stmt->close();
 
 /*Ensure there is a single OPEN cart for this user and keep its ID in session.*/
@@ -31,7 +30,7 @@ function getOrCreateOpenCartId(mysqli $conn, int $userId): int {
     }
     $stmt->close();
 
-    // 2) Create a new open cart
+    // Create a new open cart
     $stmt = $conn->prepare("INSERT INTO carts (user_id) VALUES (?)");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -39,11 +38,14 @@ function getOrCreateOpenCartId(mysqli $conn, int $userId): int {
     $stmt->close();
     return (int)$newId;
 }
+
 // Keep active cart id in session (optional but convenient)
 if (!isset($_SESSION['active_cart_id'])) {
     $_SESSION['active_cart_id'] = getOrCreateOpenCartId($conn, $userId);
 }
 $cartId = (int)$_SESSION['active_cart_id'];
+
+//HANDLERS
 
 // Add to cart (from product.php)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id']) && !isset($_POST['update_item_id']) && !isset($_POST['remove_item_id'])) {
@@ -87,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_item_id'])) {
     exit();
 }
 
-// Fetch cart data
+/*FETCH CART ITEMS*/
 $stmt = $conn->prepare("
   SELECT ci.item_id, i.inventory_id, i.name, i.price, ci.quantity
   FROM cart_items ci
@@ -99,13 +101,27 @@ $stmt->execute();
 $items = $stmt->get_result();
 
 $total = 0;
+
+// Count distinct items in cart
+$countStmt = $conn->prepare("
+  SELECT COUNT(*) as total_items 
+  FROM cart_items 
+  WHERE cart_id = ?
+");
+$countStmt->bind_param("i", $cartId);
+$countStmt->execute();
+$countRes = $countStmt->get_result();
+$countRow = $countRes->fetch_assoc();
+$_SESSION['cart_count'] = (int)$countRow['total_items'];
+$countStmt->close();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Cart | Sameera Super</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_u.css">
 </head>
 <body>
 
@@ -115,9 +131,17 @@ $total = 0;
     Sameera Super
   </div>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
+    <li><a href="home_u.php">Home</a></li>
     <li><a href="product.php">Products</a></li>
-    <li><a href="cart.php" class="active">Cart</a></li>
+    <li>
+  <a href="cart.php">
+    Cart
+    <?php if (isset($_SESSION['cart_count']) && $_SESSION['cart_count'] > 0): ?>
+      <span class="cart-count"><?= $_SESSION['cart_count'] ?></span>
+    <?php endif; ?>
+  </a>
+</li>
+
     <li><a href="profile.php">Profile</a></li>
     <li><a href="login.php">Login</a></li>
   </ul>
@@ -172,4 +196,15 @@ $total = 0;
 
 </div>
 </body>
+<!-- Active navbar link -->
+<script>
+  const currentPage = window.location.pathname.split("/").pop();
+  const navLinks = document.querySelectorAll(".nav-links a");
+  navLinks.forEach(link => {
+    const linkPage = link.getAttribute("href");
+    if (linkPage === currentPage) {
+      link.classList.add("active");
+    }
+  });
+</script>
 </html>
