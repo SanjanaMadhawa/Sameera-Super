@@ -124,7 +124,22 @@ $result = $conn->query("SELECT * FROM users WHERE is_active=1 ORDER BY user_id D
       <?php endwhile; ?>
     </tbody>
   </table>
+ </div>
+
+  <!-- Report Section -->
+  <div class="section-box">
+    <h3>Generate Customer Report</h3>
+    <form method="POST" action="customerreport.php">
+      <label for="report_type">Choose report type:</label>
+      <select name="report_type" id="report_type" required>
+        <option value="all">All Active Customers</option>
+        <option value="recent">Recently Added (last 30 days)</option>
+      </select>
+      <button type="submit" name="report_csv">Download CSV Report</button>
+    </form>
+  </div>
+
 </div>
-      </div>
+
 </body>
 </html>
