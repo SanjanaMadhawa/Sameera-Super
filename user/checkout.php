@@ -7,7 +7,7 @@ if (!isset($_SESSION['userEmail'])) {
     exit();
 }
 
-// Get user_id from session email
+// get user id
 $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
 $stmt->bind_param("s", $_SESSION['userEmail']);
 $stmt->execute();
@@ -16,21 +16,20 @@ $user = $res->fetch_assoc();
 $userId = (int)$user['user_id'];
 $stmt->close();
 
-// Ensure active cart exists
+// ensure cart id exists in session
 if (empty($_SESSION['active_cart_id'])) {
     header("Location: cart.php");
     exit();
 }
 $cartId = (int)$_SESSION['active_cart_id'];
 
-// Ensure cart has items
+// ensure cart has items
 $check = $conn->prepare("SELECT COUNT(*) FROM cart_items WHERE cart_id = ?");
 $check->bind_param("i", $cartId);
 $check->execute();
 $check->bind_result($cnt);
 $check->fetch();
 $check->close();
-
 if ($cnt == 0) {
     header("Location: cart.php");
     exit();
@@ -58,23 +57,36 @@ try {
 
     // Create order
     $stmt = $conn->prepare("
-        INSERT INTO orders (user_id, order_date, total_amount) 
-        VALUES (?, NOW(), ?)
+        INSERT INTO orders (user_id, order_date, total_amount, status) 
+        VALUES (?, NOW(), ?, 'Pending')
     ");
     $stmt->bind_param("id", $userId, $total);
     $stmt->execute();
     $orderId = $stmt->insert_id;
     $stmt->close();
 
-    // Insert order items from cart
+    // Insert order items from cart (and set order_items.status='Pending')
     $stmt = $conn->prepare("
-        INSERT INTO order_items (order_id, product_id, quantity, price)
-        SELECT ?, ci.product_id, ci.quantity, i.price
+        INSERT INTO order_items (order_id, product_id, quantity, price, status)
+        SELECT ?, ci.product_id, ci.quantity, i.price, 'Pending'
         FROM cart_items ci
         JOIN inventory i ON ci.product_id = i.inventory_id
         WHERE ci.cart_id = ?
     ");
     $stmt->bind_param("ii", $orderId, $cartId);
+    $stmt->execute();
+    $stmt->close();
+
+    // ALSO insert into cart_details so user sees statuses later
+    $stmt = $conn->prepare("
+        INSERT INTO cart_details (user_id, cart_id, order_id, product_id, product_name, quantity, price, status)
+        SELECT ?, ?, ?, oi.product_id, i.name, oi.quantity, oi.price, 'Pending'
+        FROM order_items oi
+        JOIN inventory i ON oi.product_id = i.inventory_id
+        WHERE oi.order_id = ?
+    ");
+    // bind: userId, cartId, orderId, orderId (last for WHERE)
+    $stmt->bind_param("iiii", $userId, $cartId, $orderId, $orderId);
     $stmt->execute();
     $stmt->close();
 
@@ -106,16 +118,11 @@ try {
 
     $conn->commit();
 
-    // Redirect with success
     header("Location: cart.php?success=order_placed");
     exit();
-
 } catch (Throwable $e) {
     $conn->rollback();
+    // optionally log $e->getMessage()
     header("Location: cart.php?error=checkout_failed");
     exit();
 }
-?>
-
-
-
